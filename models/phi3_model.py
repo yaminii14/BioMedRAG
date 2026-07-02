@@ -33,25 +33,22 @@ class Phi3Model:
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         
-        # Load model with optimizations
+               # Load model with optimizations
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
-            torch_dtype=torch.float32,  # CPU needs float32
+            torch_dtype=torch.float16,
             trust_remote_code=True,
-            low_cpu_mem_usage=True
+            device_map="auto"
         )
-        
-        # Move to device
-        self.model.to(self.device)
+
         self.model.eval()
         
         # Create pipeline for stable generation on CPU
         self.pipe = pipeline(
-            "text-generation",
-            model=self.model,
-            tokenizer=self.tokenizer,
-            device=self.device if self.device == "cuda" else -1  # -1 for CPU in pipeline
-        )
+    "text-generation",
+    model=self.model,
+    tokenizer=self.tokenizer
+)
         
         # Get model info
         total_params = sum(p.numel() for p in self.model.parameters())
@@ -148,3 +145,5 @@ Answer the question based on the provided documents. Be specific and cite releva
             results.append(result)
         
         return results
+
+          
